@@ -1,0 +1,11 @@
+---
+# Common utilities for all VMs
+- import_tasks: nano.yml
+  tags: [nano]
+
+- name: Install packages
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - tcpdump
+    - wget

@@ -1,0 +1,67 @@
+---
+# Deploy user accounts
+- name: Install needed packages
+  yum:
+    name: libselinux-python,rsync
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Add admin group
+  group:
+    name: admin
+#    gid: "{{ admingid }}"
+    state: present
+
+- name: Add sudoers without passwd to admin group
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%admin'
+    line: '%admin ALL=(ALL) NOPASSWD: ALL'
+
+- name: Create admin users
+  user:
+    name: "{{ item.0.name }}"
+    comment: "{{ item.0.comment }}"
+    update_password: on_create
+    groups: admin
+    state: present
+  when: item.1 in group_names + [ 'all' ] and ( item.0.state is undefined or item.0.state == 'present')
+  with_subelements:
+    - "{{ users }}"
+    - user_hosts
+    - skip_missing: yes
+  loop_control:
+    label: "{{ item.0.name }}"
+
+- name: Add ssh keys for admin users
+  include_tasks: add_ssh_keys.yml
+  vars:
+    single_user: "{{ item }}"
+  when: item.state is undefined or item.state == 'present'
+  with_items:
+    - "{{ users }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create openrc files in jumphost
+  include_tasks: create_openrc.yml
+  static: no
+  when:
+    - ansible_hostname.find('jump') != -1
+    - item.0.state is undefined or item.0.state == 'present'
+
+- name: Create SSH config in jumphost
+  include_tasks: ssh_config.yml
+  vars:
+    single_user: "{{ item.0 }}"
+  static: no
+  when:
+    - inventory_hostname in groups['jumphosts']
+    - item.1 in group_names + [ 'all' ] and ( item.0.state is undefined or item.0.state == 'present')
+  with_subelements:
+    - "{{ users }}"
+    - user_hosts
+    - skip_missing: yes
+  loop_control:
+    label: "{{ item.0.name }}"
+...

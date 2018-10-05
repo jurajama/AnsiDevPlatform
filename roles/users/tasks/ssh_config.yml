@@ -1,0 +1,44 @@
+---
+# all users need SSH config in jumphost that agent forwarding is enabled
+# or otherwise git cloning would not work in all cases
+- name: Set fact for username
+  set_fact:
+    user_name: "{{ single_user.name }}"
+  tags: [ssh_config_update]
+
+- name: Create ssh directory for all users
+  file:
+    path: "/home/{{ user_name }}/.ssh"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: 0700
+    state: directory
+  when:
+    - inventory_hostname in groups['jumphosts']
+
+- name: Create ssh config file for jenkinsci user
+  template:
+    src: "templates/ssh_config.j2"
+    dest: "/home/jenkinsci/.ssh/config"
+    owner: "jenkinsci"
+    group: "jenkinsci"
+    mode: 0600
+  when:
+    - inventory_hostname in groups['jumphosts']
+    - user_name == 'jenkinsci'
+
+# Create config file only if it does not yet exist.
+# To force update, run playbook with parameter "-e force_ssh_config_update=yes"
+- name: Create ssh config file for other users
+  template:
+    src: "templates/ssh_config.j2"
+    dest: "/home/{{ user_name }}/.ssh/config"
+    force: "{{ force_ssh_config_update | default('no') }}"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: 0600
+  when:
+    - inventory_hostname in groups['jumphosts']
+    - user_name != 'jenkinsci'
+  tags: [ssh_config_update]
+...

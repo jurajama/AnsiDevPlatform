@@ -1,0 +1,274 @@
+---
+# To run this, you need to have openstack-clients and Openstack connection
+# variables.
+#
+# - Openstack clients:
+#   http://docs.openstack.org/user-guide/content/install_clients.html
+# - connection variables
+#   https://go.soneracloud.fi/project/access_and_security/api_access/openrc/
+
+- name: Check need for fixed ip
+  set_fact:
+    fixed_ip: [ ip_address: "{{ networks[0].ip }}" ]
+  when: networks[0].ip is defined
+
+- name: Port for primary net
+  os_port:
+    name: "{{ name }}-0"
+    network: "{{ networks[0].name }}"
+    security_groups: "{{ security_groups | default('ssh,ping')}}"
+    fixed_ips: "{{ fixed_ip | default( omit ) }}"
+    allowed_address_pairs: "{{ networks[0].allowed | default(omit) }}"
+    mac_address: "{{ networks[0].mac | default(omit) }}"
+
+- name: Check need for volume
+  set_fact:
+    real_volume_name: "{{ volume_name }}"
+  when:
+    - volume_size is defined
+    - skip_volume_creation is not defined
+
+# This image check is done to give user more clear indication when
+# the requested image is not found. Otherwise the error message at instance
+# creation phase can be quite difficult to understand what is wrong.
+
+- name: Check that image exists
+  os_image_facts:
+    image: "{{ boot_image }}"
+  when: boot_image is defined
+
+- assert:
+    that: openstack_image.id is defined
+    msg: "Requested image {{ boot_image }} was not found. Did you remember to upload the image or share from another project or accept sharing with 'openstack image set --accept <ID>'?"
+
+- name: Check do we boot from volume or image
+  set_fact:
+    rootdisk_image_name: "{{ boot_image }}"
+  when: volume_size is undefined or skip_volume_creation is defined
+
+- name: Create volume
+  os_volume:
+    display_name: "{{ real_volume_name }}"
+    image: "{{ boot_image }}"
+    size: "{{ volume_size }}"
+    timeout: "{{ 1800 }}"
+    wait: yes
+  when:
+    - volume_size is defined
+    - skip_volume_creation is not defined
+
+# When VMs are configured in the same anti-affinity group, they will be allocated on different compute nodes.
+- name: Create server group for anti-affinity configuration
+  os_server_group:
+    name: "{{ antiaffinity_group }}"
+    policies:
+      - anti-affinity
+  register: server_group_output
+  when: antiaffinity_group is defined
+
+# register is executed also for skipped tasks and therefore need to use different variable
+# in following two tasks
+
+# There is difference in some older vs newer OpenStack versions in handling scheduler_hints
+# parameter. In newer versions that must be totally excluded.
+
+- block:
+  - name: "Create instance {{ name }} - New OpenStack"
+    register: instance_tre
+    os_server:
+      name: "{{ name }}"
+      image: "{{ rootdisk_image_name | default( omit ) }}"
+      boot_volume: "{{ real_volume_name | default ( omit ) }}"
+      flavor: "{{ flavor | default('sonera.linux.tiny') }}"
+      key_name: "{{ lookup('env','OS_KEYPAIR_NAME') }}"
+      security_groups: "{{ security_groups | default('ssh,ping')}}"
+      public_ip: "{{ public_ip | default('no') }}"
+  #    scheduler_hints:
+  #       group: "{{ server_group_output.id | default() }}"
+      availability_zone: "{{ availability_zone | default( omit ) }}"
+      wait: yes
+      nics:
+        - port-name: "{{ name }}-0"
+  # Ignoring empty scheduler hints does not work in newer openstack
+
+  - set_fact:
+      instance: "{{ instance_tre }}"
+
+  when: new_openstack|default(true)|bool == true
+
+- block:
+  - name: "Create instance {{ name }} - old OpenStack"
+    register: instance_hos
+    os_server:
+      name: "{{ name }}"
+      image: "{{ rootdisk_image_name | default( omit ) }}"
+      boot_volume: "{{ real_volume_name | default ( omit ) }}"
+      flavor: "{{ flavor | default('sonera.linux.tiny') }}"
+      key_name: "{{ lookup('env','OS_KEYPAIR_NAME') }}"
+      security_groups: "{{ security_groups | default('ssh,ping')}}"
+      public_ip: "{{ public_ip | default('no') }}"
+      scheduler_hints:
+         group: "{{ server_group_output.id | default() }}"
+      availability_zone: "{{ availability_zone | default( omit ) }}"
+      wait: yes
+      nics:
+        - port-name: "{{ name }}-0"
+
+  - set_fact:
+      instance: "{{ instance_hos }}"
+  when: new_openstack|default(true)|bool == false
+
+# In the above os_server task parameter "public_ip" is legacy implementation that does not allow choosing IP explicitly
+# In cases where you want a specific floating IP for primary interface, use parameter public_primary_ip instead
+- name: Assign floating IP to primary interface
+  os_floating_ip:
+    server: "{{ name }}"
+    fixed_address: "{{ networks[0].ip }}"
+    floating_ip_address: "{{ public_primary_ip }}"
+    reuse: yes
+  register: task_result
+  until: task_result|succeeded
+  retries: 4
+  delay: 2
+  when: public_primary_ip is defined
+
+# Also this task fails randomly when run with Jenkins
+- name: Fetch OpenStack resource status
+  os_server_facts:
+    server: "{{ name }}"
+  register: task_result
+  until: task_result|succeeded
+  retries: 4
+  delay: 2
+
+- block:
+  # block for handling second net
+  - name: Check need for fixed ip on second net
+    set_fact:
+      fixed_ip2: [ ip_address: "{{ networks[1].ip }}" ]
+    when: networks[1].ip is defined and networks[1].ip != 'auto'
+
+  - name: Check need for fixed ip on second net
+    set_fact:
+      fixed_ip2: 'auto'
+    when: networks[1].ip is undefined or networks[1].ip == 'auto'
+
+  - name: Check need for fixed mac on second net
+    set_fact:
+      mac: "{{ networks[1].mac }}"
+    when: networks[1].mac is defined and networks[1].mac != 'auto'
+
+  - name: Check need for fixed mac on second net
+    set_fact:
+      mac: 'auto'
+    when: networks[1].mac is undefined or networks[1].mac == 'auto'
+
+  # Stupid trick to circumvent ansible flaw
+  - name: Store secondary network name
+    set_fact:
+      net2name: "{{ networks[1].name }}"
+    when: networks[1].name is defined
+
+  - name: Store secondary network name
+    set_fact:
+      net2name: "nonet"
+    when: networks[1].name is undefined
+
+  - name: Add second network if needed
+    register: port2
+    os_port:
+      name: "{{ name }}-1"
+      network: "{{ networks[1].name }}"
+      security_groups: "{{ security_groups | default('ssh,ping')}}"
+      fixed_ips: "{{ fixed_ip2 if fixed_ip2 != 'auto' else omit }}"
+      allowed_address_pairs: "{{ networks[1].allowed | default(omit) }}"
+      mac_address: "{{ mac if mac != 'auto' else omit }}"
+    when:
+      - networks[1].name is defined
+      - openstack_servers[0].addresses.{{ net2name }} is undefined
+
+  - name: Extra wait before second interface attach
+    pause:
+      seconds: "{{ second_interface_delay }}"
+    when:
+      - second_interface_delay is defined
+
+  - name: Attach second network port (if there is such)
+    command: "nova interface-attach --port-id {{ port2.id }} {{ openstack_servers[0].id }}"
+    ignore_errors: yes
+    when: port2.id is defined
+
+  # This task to assign floating-IP is used when allocating FIP to the secondary network interface
+  - name: Assign floating IP to secondary interface
+    os_floating_ip:
+      server: "{{ name }}"
+      fixed_address: "{{ networks[1].ip }}"
+      floating_ip_address: "{{ public_secondary_ip }}"
+      reuse: yes
+    when: public_secondary_ip is defined
+  when: networks[1] is defined
+#end of block for second net
+
+- name: Fetch OpenStack resource status
+  os_server_facts:
+    server: "{{ name }}"
+  register: task_result
+  until: task_result|succeeded
+  retries: 4
+  delay: 2
+
+- name: Store the primary ip
+  set_fact: access_ip="{{ openstack_servers[0].networks[networks[0].name][0] }}"
+
+- name: clear ssh known_hosts
+  known_hosts: name="{{ access_ip }}" state=absent
+  when: access_ip is defined and instance|changed
+
+- name: Hard reboot VM
+  command: "openstack server reboot --hard {{ name }}"
+  when:
+   - instance|changed
+   - reboot_after_create is defined
+   - reboot_after_create==true
+
+# Need to use netcat to test for TCP port 22 accessibility because using
+# Ansible wait_for does not work correctly when the task is delegated to localhost
+- name: Wait for VMs to be accessible by SSH
+  command: "nc -i 1 -w 2 {{ access_ip }} {{ ssh_port |default('22') }}"
+  register: ncstatus
+  until: '"Idle timeout expired" in ncstatus.stderr'
+  retries: "{{ netcat_retries | default( 20 ) }}"
+  delay: "{{ netcat_delay | default( 10 ) }}"
+  failed_when: '"Idle timeout expired" not in ncstatus.stderr'
+  changed_when: false
+  when: (test_ssh is not defined or test_ssh == "yes") and ssh_check_username is not defined
+
+# This is more advanced SSH connection test than the above task.
+# In this check also SSH key needs to have been injected successfully while in above task
+# it is enough to have port 22 listening.
+- name: Wait until {{ ssh_check_username }} user can log into the host
+  local_action: "command ssh -a -oBatchMode=yes -oStrictHostKeyChecking=no -p {{ ssh_port |default('22') }} {{ ssh_check_username }}@{{ ssh_check_ip|default(access_ip) }} exit"
+  register: ssh_output
+  until: ssh_output.rc == 0
+  retries: 20
+  delay: 10
+  when:
+    - instance|changed
+    - ssh_check_username is defined
+
+# Need to have this extra wait because netcat to port 22 succeeds even
+# before SSH-keys have been injected by cloud-init
+
+- name: Extra wait waiting for SSH to initialize
+  pause:
+    seconds: "{{ ssh_delay | default( 20 ) }}"
+  when:
+    - instance|changed
+    - ssh_check_username is not defined
+    - test_ssh is not defined or test_ssh == "yes"
+
+- name: get ssh keys
+  shell: ssh -o StrictHostKeyChecking=no -o BatchMode=yes "{{ ssh_check_ip|default(access_ip) }}" || /bin/true
+  changed_when: false
+  when: test_ssh is not defined or test_ssh == "yes"
+...

@@ -1,0 +1,17 @@
+---
+- name: Set fact needed for key handling
+  set_fact:
+    user_keys: "{{ single_user.authorized }}"
+    user_hosts: "{{ single_user.user_hosts }}"
+    user_name: "{{ single_user.name }}"
+
+- name: Add ssh key
+  authorized_key: "user={{ user_name }} key='{{ inner_item[0] }}'"
+  when:
+    - inner_item[1] in group_names + [ 'all' ]
+  with_nested:
+    - "{{ user_keys }}"
+    - "{{ user_hosts }}"
+  loop_control:
+    loop_var: inner_item
+    label: "{{ user_name }} - {{ inner_item[1] }}"

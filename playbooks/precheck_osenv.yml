@@ -1,0 +1,21 @@
+---
+# Precheck some environment variables
+- name: Precheck of environment variables
+  hosts: all
+  gather_facts: false
+  run_once: true
+  vars:
+    osproject_test: "{{ lookup('env', 'OS_PROJECT_NAME') }}"
+
+  tasks:
+    - name: Check OS_PROJECT_NAME environment variable
+      assert:
+	that: osproject_test!=""
+        msg: "Env variable OS_PROJECT_NAME must be defined to indicate your OpenStack project."
+
+    - name: Check env settings - env1
+      assert:
+	that:
+          - "'env1' in osproject_test"
+        msg: "OS_PROJECT_NAME environment variable and chosen inventory do not match"
+      when: "'env1' in inventory_file"

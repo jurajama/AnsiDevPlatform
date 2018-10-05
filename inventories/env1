@@ -1,0 +1,8 @@
+[localhost_group]
+localhost ansible_connection=local
+
+[env1:children]
+jumphosts
+
+[jumphosts]
+jump1-env1 ansible_host="{{ envdef.jump1_ip }}"

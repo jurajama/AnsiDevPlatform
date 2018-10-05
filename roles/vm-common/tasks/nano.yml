@@ -1,0 +1,23 @@
+---
+# Install nano and enable syntax highlighting
+- name: Install nano
+  yum:
+    name: nano
+
+- name: Copy nanorc file
+  copy:
+    src: "files/nanorc"
+    dest: "/etc/nanorc"
+
+# Syntax highlighting files from this github repo are better than the default files that come with nano
+# Using specific commit to avoid unexpected failures from master
+- name: Update syntax files
+  get_url:
+    url: "https://raw.githubusercontent.com/scopatz/nanorc/bba53c3940/{{ item }}"
+    dest: "/usr/share/nano/{{ item }}"
+    force: yes  # overwrite existing file
+  with_items:
+    - html.nanorc
+    - xml.nanorc
+    - yaml.nanorc
+    - json.nanorc

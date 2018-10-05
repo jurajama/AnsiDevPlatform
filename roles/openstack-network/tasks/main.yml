@@ -1,0 +1,17 @@
+---
+- name: Create network
+  os_network:
+    name: "{{ envdef.name }}_net"
+
+- name: Create subnet
+  os_subnet:
+    name: "{{ envdef.name }}_subnet"
+    network_name: "{{ envdef.name }}_net"
+    cidr: "{{ envdef.net1_cidr }}"
+
+- name: Create router
+  os_router:
+    name: "{{ envdef.name }}_router1"
+    interfaces:
+      - "{{ envdef.name }}_net1"
+    network: "{{ envdef.provider_net_name }}"

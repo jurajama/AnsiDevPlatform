@@ -1,0 +1,15 @@
+---
+# This playbook creates OpenStack networks for the environment
+#
+# Usage:
+# - Source OpenStack environment variables
+# - Run playbook:
+#   ansible-playbook -i inventories/ENV openstack-net-create.yml
+
+- name: Precheck of environment variables
+  import_playbook: playbooks/precheck_osenv.yml
+
+- hosts: localhost
+  roles:
+    - openstack-network
+...

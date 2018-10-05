@@ -1,0 +1,5 @@
+*.retry
+ext-roles/*
+/**/*.pyc
+
+TEST-FILE*
