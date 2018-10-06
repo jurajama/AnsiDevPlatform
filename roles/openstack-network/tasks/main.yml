@@ -1,17 +1,20 @@
 ---
-- name: Create network
+- name: Create network {{ os_net_name }}
   os_network:
-    name: "{{ envdef.name }}_net"
+    name: "{{ os_net_name }}"
+    region_name: "{{ os_net_region }}"
 
-- name: Create subnet
+- name: Create subnet {{ os_net_name }}_subnet
   os_subnet:
-    name: "{{ envdef.name }}_subnet"
-    network_name: "{{ envdef.name }}_net"
-    cidr: "{{ envdef.net1_cidr }}"
+    name: "{{ os_net_name }}_subnet"
+    network_name: "{{ os_net_name }}"
+    cidr: "{{ os_net_cidr }}"
+    region_name: "{{ os_net_region }}"
 
-- name: Create router
+- name: Create router {{ os_net_region }}_router
   os_router:
-    name: "{{ envdef.name }}_router1"
+    name: "{{ os_net_region }}_router1"
     interfaces:
-      - "{{ envdef.name }}_net1"
-    network: "{{ envdef.provider_net_name }}"
+      - "{{ os_net_name }}_subnet"
+    network: "{{ os_net_extnet }}"
+    region_name: "{{ os_net_region }}"

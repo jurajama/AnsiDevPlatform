@@ -1,0 +1,15 @@
+---
+# Common configuration for all OpenStack VMs
+- name: Set timezone
+  timezone:
+    name: "{{ vm_timezone |default('Europe/Helsinki') }}"
+
+- name: Install packages
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - tcpdump
+    - nano
+
+- import_tasks: nano.yml
+  tags: [nano]

@@ -1,0 +1,24 @@
+---
+# This playbook deploys users to VMs
+- name: Precheck of environment variables
+  import_playbook: playbooks/precheck_osenv.yml
+  tags: [always]
+
+# localhost is excluded because that is covered by jumphosts group
+- name: Delete removed users
+  hosts: all:!localhost
+  become: yes
+  tasks:
+    - name: Delete absent users
+      include_role:
+        name: users
+        tasks_from: delete.yml
+  tags: [delete]
+
+- name: Deploy users
+  hosts: all:!localhost
+  become: yes
+  roles:
+    - users
+  tags: [deploy]
+...

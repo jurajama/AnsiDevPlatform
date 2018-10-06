@@ -1,0 +1,8 @@
+---
+- import_tasks: all_open.yml
+  tags:
+    - all-open-secgroup
+
+- import_tasks: jumphost.yml
+  tags:
+    - jumphost-secgroup

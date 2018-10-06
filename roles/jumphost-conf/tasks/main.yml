@@ -1,0 +1,35 @@
+---
+- name: Install epel-release repo
+  yum:
+    name: epel-release
+
+- name: Install packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ jump_packages }}"
+
+- name: Copy pip requirements file to target
+  template:
+    src: "templates/pip-requirements.txt.j2"
+    dest: "/tmp/pip-requirements.txt"
+
+# pip requirements install may fail unless setuptools is upgraded
+- name: Upgrade python setuptools
+  pip:
+    name: setuptools
+    state: forcereinstall
+
+- name: Install python modules
+  pip:
+    requirements: "/tmp/pip-requirements.txt"
+
+# By default Jinja2 is too old version for some Ansible functionality
+- name: Upgrade Jinja2
+  pip:
+    name: Jinja2
+    version: "{{ jump_jinja2_version }}"
+    state: forcereinstall
+  tags: [jinja2]
+

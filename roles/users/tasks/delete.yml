@@ -1,0 +1,14 @@
+---
+# Delete users which have state: absent in data
+
+- name: Delete admin users marked as absent
+  user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment }}"
+    state: absent
+  when: item.state is defined and item.state == 'absent'
+  with_items:
+    - "{{ users }}"
+  loop_control:
+    label: "{{ item.name }}"
+...

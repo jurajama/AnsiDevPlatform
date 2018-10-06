@@ -2,7 +2,8 @@
 localhost ansible_connection=local
 
 [env1:children]
+localhost_group
 jumphosts
 
 [jumphosts]
-jump1-env1 ansible_host="{{ envdef.jump1_ip }}"
+jump1-env1 ansible_host="{{ envdef.jump1_floating_ip }}" mgmt_ip="{{ envdef.jump1_ip }}" floating_ip="{{ envdef.jump1_floating_ip }}"

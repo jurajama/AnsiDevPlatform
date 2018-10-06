@@ -1,0 +1,15 @@
+---
+# Precheck some environment variables
+- name: Precheck of environment variables
+  hosts: all
+  gather_facts: false
+  run_once: true
+  vars:
+    keypair_test: "{{ lookup('env', 'OS_KEYPAIR_NAME') }}"
+  tasks:
+    - name: Check OS_KEYPAIR_NAME environment variable
+      assert:
+        that: keypair_test!=""
+        msg: "Env variable OS_KEYPAIR_NAME must be defined to indicate your SSH keypair name."
+  tags: [always]
+...

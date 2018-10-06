@@ -10,12 +10,13 @@
   tasks:
     - name: Check OS_PROJECT_NAME environment variable
       assert:
-	that: osproject_test!=""
+        that: osproject_test!=""
         msg: "Env variable OS_PROJECT_NAME must be defined to indicate your OpenStack project."
 
-    - name: Check env settings - env1
-      assert:
-	that:
-          - "'env1' in osproject_test"
-        msg: "OS_PROJECT_NAME environment variable and chosen inventory do not match"
-      when: "'env1' in inventory_file"
+# You can add cross-check for OpenStack project vs Ansible inventory:
+#    - name: Check env settings - env1
+#      assert:
+#        that:
+#          - "'env1' in osproject_test"
+#        msg: "OS_PROJECT_NAME environment variable and chosen inventory do not match"
+#      when: "'env1' in inventory_file"

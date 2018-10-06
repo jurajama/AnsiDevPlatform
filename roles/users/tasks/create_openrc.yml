@@ -1,0 +1,16 @@
+---
+# Create openrc files in jumphost
+
+# openrc file for Nebula
+- name: Make Nebula cloud config file for admin users
+  template:
+    src: "templates/nebula_openrc.sh"
+    dest: "/home/{{ item.name }}/nebula_openrc.sh"
+    owner: "{{ item.name }}"
+    force: no
+  with_items: "{{ users }}"
+  when: "( ansible_hostname.find('jump') != -1 and item.openstack_username is defined and ('jump' in item.user_hosts or 'all' in item.user_hosts ) )"
+  loop_control:
+    label: "{{ item.name }}"
+  tags: [nebula]
+...

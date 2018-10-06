@@ -1,0 +1,26 @@
+---
+jump_packages:
+  - python-devel
+  - python-pip
+  - screen
+  - libffi
+  - libffi-devel
+  - openssl-devel
+  - bind-utils
+  - psmisc
+  - nano
+  - vim
+  - "@Development tools"
+  - bash-completion-extras
+  - nc
+  - libguestfs-tools
+  - sshpass
+  - tree
+  - telnet
+  - tcpdump
+  - traceroute
+  - wget
+  - squashfs-tools
+  - java-1.8.0-openjdk
+  - ftp
+  - expect

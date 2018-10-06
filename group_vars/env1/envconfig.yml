@@ -1,12 +1,17 @@
 jumphost_ansible_version: "2.6.3"
 
+# OpenStack network configuration
+os_net_region: "fi-1"
+os_net_extnet: "Public-Helsinki-1"
+os_net_cidr: 10.10.10.0/24
+os_net_name: "env1_net"
+
+availability_zone: "helsinki-1"
+
 envdef:
   name: ENV1
 
-  # OpenStack provider network
-  provider_net_name: ext-net
-
-  net1_cidr: 10.20.30.0/24
-
-  jump1_ip: 10.20.30.10
-#  jump1_floating_ip: TODO
+# When you create the inventory, allocate floating IP with command:
+# openstack floating ip create --description jump1_floating_ip Public-Helsinki-1
+  jump1_ip: 10.10.10.10
+  jump1_floating_ip: 213.157.72.109
