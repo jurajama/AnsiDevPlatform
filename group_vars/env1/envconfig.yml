@@ -6,7 +6,10 @@ os_net_name: "env1_net"
 
 availability_zone: "helsinki-1"
 
+# NOTE: Set real values of your project to following variables
+openstack_project_id: 123456
 openstack_project_name: "Test Project"
+
 openstack_region: "fi-1"
 
 envdef:
