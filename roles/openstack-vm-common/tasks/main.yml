@@ -7,7 +7,7 @@
 - name: Install packages
   yum:
     name: "{{ item }}"
-  with_items:
+  loop:
     - tcpdump
     - nano
 

@@ -14,7 +14,7 @@
 
 - name: Port for primary net
   os_port:
-    name: "{{ name }}-0"
+    name: "{{ vm_name }}-0"
     network: "{{ networks[0].name }}"
     security_groups: "{{ security_groups | default('ssh,ping')}}"
     fixed_ips: "{{ fixed_ip | default( omit ) }}"
@@ -73,10 +73,10 @@
 # parameter. In newer versions that must be totally excluded.
 
 - block:
-  - name: "Create instance {{ name }} - New OpenStack"
+  - name: "Create instance {{ vm_name }} - New OpenStack"
     register: instance_tre
     os_server:
-      name: "{{ name }}"
+      name: "{{ vm_name }}"
       image: "{{ rootdisk_image_name | default( omit ) }}"
       boot_volume: "{{ real_volume_name | default ( omit ) }}"
       flavor: "{{ flavor | default('sonera.linux.tiny') }}"
@@ -88,7 +88,7 @@
       availability_zone: "{{ availability_zone | default( omit ) }}"
       wait: yes
       nics:
-        - port-name: "{{ name }}-0"
+        - port-name: "{{ vm_name }}-0"
   # Ignoring empty scheduler hints does not work in newer openstack
 
   - set_fact:
@@ -97,10 +97,10 @@
   when: new_openstack|default(true)|bool == true
 
 - block:
-  - name: "Create instance {{ name }} - old OpenStack"
+  - name: "Create instance {{ vm_name }} - old OpenStack"
     register: instance_hos
     os_server:
-      name: "{{ name }}"
+      name: "{{ vm_name }}"
       image: "{{ rootdisk_image_name | default( omit ) }}"
       boot_volume: "{{ real_volume_name | default ( omit ) }}"
       flavor: "{{ flavor | default('sonera.linux.tiny') }}"
@@ -112,7 +112,7 @@
       availability_zone: "{{ availability_zone | default( omit ) }}"
       wait: yes
       nics:
-        - port-name: "{{ name }}-0"
+        - port-name: "{{ vm_name }}-0"
 
   - set_fact:
       instance: "{{ instance_hos }}"
@@ -122,12 +122,12 @@
 # In cases where you want a specific floating IP for primary interface, use parameter public_primary_ip instead
 - name: Assign floating IP to primary interface
   os_floating_ip:
-    server: "{{ name }}"
+    server: "{{ vm_name }}"
     fixed_address: "{{ networks[0].ip }}"
     floating_ip_address: "{{ public_primary_ip }}"
     reuse: yes
   register: task_result
-  until: task_result|succeeded
+  until: task_result is succeeded
   retries: 4
   delay: 2
   when: public_primary_ip is defined
@@ -135,9 +135,9 @@
 # Also this task fails randomly when run with Jenkins
 - name: Fetch OpenStack resource status
   os_server_facts:
-    server: "{{ name }}"
+    server: "{{ vm_name }}"
   register: task_result
-  until: task_result|succeeded
+  until: task_result is succeeded
   retries: 4
   delay: 2
 
@@ -177,7 +177,7 @@
   - name: Add second network if needed
     register: port2
     os_port:
-      name: "{{ name }}-1"
+      name: "{{ vm_name }}-1"
       network: "{{ networks[1].name }}"
       security_groups: "{{ security_groups | default('ssh,ping')}}"
       fixed_ips: "{{ fixed_ip2 if fixed_ip2 != 'auto' else omit }}"
@@ -201,7 +201,7 @@
   # This task to assign floating-IP is used when allocating FIP to the secondary network interface
   - name: Assign floating IP to secondary interface
     os_floating_ip:
-      server: "{{ name }}"
+      server: "{{ vm_name }}"
       fixed_address: "{{ networks[1].ip }}"
       floating_ip_address: "{{ public_secondary_ip }}"
       reuse: yes
@@ -211,21 +211,22 @@
 
 - name: Fetch OpenStack resource status
   os_server_facts:
-    server: "{{ name }}"
+    server: "{{ vm_name }}"
   register: task_result
-  until: task_result|succeeded
+  until: task_result is succeeded
   retries: 4
   delay: 2
 
+# Note: In some older Ansible versions "networks" was used in place of "addresses"
 - name: Store the primary ip
-  set_fact: access_ip="{{ openstack_servers[0].networks[networks[0].name][0] }}"
+  set_fact: access_ip="{{ openstack_servers[0].addresses[networks[0].name][0] }}"
 
 - name: clear ssh known_hosts
   known_hosts: name="{{ access_ip }}" state=absent
   when: access_ip is defined and instance|changed
 
 - name: Hard reboot VM
-  command: "openstack server reboot --hard {{ name }}"
+  command: "openstack server reboot --hard {{ vm_name }}"
   when:
    - instance|changed
    - reboot_after_create is defined

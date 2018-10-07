@@ -1,12 +1,13 @@
-jumphost_ansible_version: "2.6.3"
-
+---
 # OpenStack network configuration
-os_net_region: "fi-1"
 os_net_extnet: "Public-Helsinki-1"
 os_net_cidr: 10.10.10.0/24
 os_net_name: "env1_net"
 
 availability_zone: "helsinki-1"
+
+openstack_project_name: "Test Project"
+openstack_region: "fi-1"
 
 envdef:
   name: ENV1

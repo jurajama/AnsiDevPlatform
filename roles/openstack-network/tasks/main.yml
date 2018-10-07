@@ -2,19 +2,19 @@
 - name: Create network {{ os_net_name }}
   os_network:
     name: "{{ os_net_name }}"
-    region_name: "{{ os_net_region }}"
+    region_name: "{{ openstack_region }}"
 
 - name: Create subnet {{ os_net_name }}_subnet
   os_subnet:
     name: "{{ os_net_name }}_subnet"
     network_name: "{{ os_net_name }}"
     cidr: "{{ os_net_cidr }}"
-    region_name: "{{ os_net_region }}"
+    region_name: "{{ openstack_region }}"
 
-- name: Create router {{ os_net_region }}_router
+- name: Create router {{ openstack_region }}_router
   os_router:
-    name: "{{ os_net_region }}_router1"
+    name: "{{ openstack_region }}_router1"
     interfaces:
       - "{{ os_net_name }}_subnet"
     network: "{{ os_net_extnet }}"
-    region_name: "{{ os_net_region }}"
+    region_name: "{{ openstack_region }}"

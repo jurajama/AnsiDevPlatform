@@ -15,7 +15,6 @@ export OS_AUTH_URL=https://identity.fi-1.nebulacloud.fi:5000/v3
 
 # With the addition of Keystone we have standardized on the term **project**
 # as the entity that owns the resources.
-export OS_PROJECT_ID="{{ openstack_project_id }}"
 export OS_PROJECT_NAME="{{ openstack_project_name }}"
 export OS_USER_DOMAIN_NAME="Default"
 if [ -z "$OS_USER_DOMAIN_NAME" ]; then unset OS_USER_DOMAIN_NAME; fi
@@ -35,7 +34,7 @@ export OS_PASSWORD=$OS_PASSWORD_INPUT
 
 # If your configuration has multiple regions, we set that information here.
 # OS_REGION_NAME is optional and only valid in certain environments.
-export OS_REGION_NAME="{{ openstack_region_name }}"
+export OS_REGION_NAME="{{ openstack_region }}"
 # Don't leave a blank variable, unset it if it was empty
 if [ -z "$OS_REGION_NAME" ]; then unset OS_REGION_NAME; fi
 

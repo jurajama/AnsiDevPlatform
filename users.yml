@@ -1,7 +1,7 @@
 ---
 # This playbook deploys users to VMs
 - name: Precheck of environment variables
-  import_playbook: playbooks/precheck_osenv.yml
+  import_playbook: precheck_osenv.yml
   tags: [always]
 
 # localhost is excluded because that is covered by jumphosts group

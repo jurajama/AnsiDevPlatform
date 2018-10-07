@@ -1,10 +1,10 @@
 ---
 - name: Precheck of environment variables
-  import_playbook: playbooks/precheck_keypair.yml
+  import_playbook: precheck_keypair.yml
   tags: [always]
 
 - name: Precheck of environment variables
-  import_playbook: playbooks/precheck_osenv.yml
+  import_playbook: precheck_osenv.yml
   tags: [always]
 
 - name: Create instance for jumphost
@@ -12,7 +12,7 @@
   gather_facts: false
   roles:
     - role: openstack-vm-create
-      name: "{{ inventory_hostname }}"
+      vm_name: "{{ inventory_hostname }}"
       networks:
         - { name: "{{ os_net_name }}", ip: "{{ mgmt_ip }}" }
       boot_image: "{{ centos_image_name }}"

@@ -7,7 +7,7 @@
 #   ansible-playbook -i inventories/ENV openstack-net-create.yml
 
 - name: Precheck of environment variables
-  import_playbook: playbooks/precheck_osenv.yml
+  import_playbook: precheck_osenv.yml
 
 - hosts: localhost
   roles:

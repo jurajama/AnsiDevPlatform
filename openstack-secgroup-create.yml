@@ -1,6 +1,6 @@
 ---
 - name: Precheck of environment variables
-  include: playbooks/precheck_osenv.yml
+  include: precheck_osenv.yml
   tags: [always]
 
 - hosts: localhost

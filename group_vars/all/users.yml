@@ -5,7 +5,7 @@ users:
   - name: jurajama
     comment: Juha Rajamaki
     user_hosts: [all]
-    openstackname: jurajama
+    openstack_username: jurajama
     authorized:
       - 'ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAg1mRtgOegv1412IHv3V+/CyD05HAIA46eK8rp/Es3dsqd01EME1QlB0Qzl8CfO4crT0WCgCpR47Oeg65Lta2GCyS3vEN30RhJlAC/t44JqPLd4pEoBUhgmxzkMLYsnZIvTV6MPyeWzlq65clzg6PqXN0ZD5GqOIJTKIBzlZYumNQWSfsp9V+6wXxFX1+cdS30zmjMCL/2A0PmYxAJxI0JKRhwae/ce5UBnMZw35azY3tKVFz9lEBJI3QP9ubt4UmATGcoaVCfACuQuz4W/Hc8MpKt1EUeR9I/e8NzOzHJZgiJP/hVBxUhMUS8h6PUH2tLX2mZI753AV0HknuAI8wNQ== rsa-key-20181006'
 

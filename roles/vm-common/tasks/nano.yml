@@ -16,7 +16,7 @@
     url: "https://raw.githubusercontent.com/scopatz/nanorc/bba53c3940/{{ item }}"
     dest: "/usr/share/nano/{{ item }}"
     force: yes  # overwrite existing file
-  with_items:
+  loop:
     - html.nanorc
     - xml.nanorc
     - yaml.nanorc
