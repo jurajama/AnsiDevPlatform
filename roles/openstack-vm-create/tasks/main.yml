@@ -223,12 +223,12 @@
 
 - name: clear ssh known_hosts
   known_hosts: name="{{ access_ip }}" state=absent
-  when: access_ip is defined and instance|changed
+  when: access_ip is defined and instance is changed
 
 - name: Hard reboot VM
   command: "openstack server reboot --hard {{ vm_name }}"
   when:
-   - instance|changed
+   - instance is changed
    - reboot_after_create is defined
    - reboot_after_create==true
 
@@ -254,7 +254,7 @@
   retries: 20
   delay: 10
   when:
-    - instance|changed
+    - instance is changed
     - ssh_check_username is defined
 
 # Need to have this extra wait because netcat to port 22 succeeds even
@@ -264,7 +264,7 @@
   pause:
     seconds: "{{ ssh_delay | default( 20 ) }}"
   when:
-    - instance|changed
+    - instance is changed
     - ssh_check_username is not defined
     - test_ssh is not defined or test_ssh == "yes"
 

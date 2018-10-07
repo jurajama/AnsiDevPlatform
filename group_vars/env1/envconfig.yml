@@ -19,3 +19,5 @@ envdef:
 # openstack floating ip create --description jump1_floating_ip Public-Helsinki-1
   jump1_ip: 10.10.10.10
   jump1_floating_ip: 213.157.72.109
+
+  db1_ip: 10.10.10.21

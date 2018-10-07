@@ -1,0 +1,37 @@
+---
+# This is example of deploying VM that does not have public IP
+
+- name: Precheck of environment variables
+  import_playbook: precheck_keypair.yml
+  tags: [always]
+
+- name: Precheck of environment variables
+  import_playbook: precheck_osenv.yml
+  tags: [always]
+
+- name: Create instance for dbserver
+  hosts: dbservers
+  gather_facts: false
+  roles:
+    - role: openstack-vm-create
+      vm_name: "{{ inventory_hostname }}"
+      networks:
+        - { name: "{{ os_net_name }}", ip: "{{ mgmt_ip }}" }
+      boot_image: "{{ centos_image_name }}"
+      flavor: "{{ db_flavor }}"
+      security_groups: "All_open"
+      ssh_check_username: "centos"
+      ssh_check_ip: "{{ mgmt_ip }}"
+      delegate_to: localhost
+  tags: [vm]
+
+- name: Configure dbserver
+  hosts: dbservers
+  become: yes
+  remote_user: "{{ 'centos' if ((instance is defined and instance.changed==true) or force_centos is defined ) else (omit) }}"
+  roles:
+    - users
+    - openstack-vm-common
+    - dbserver-conf
+  tags: [conf]
+...
