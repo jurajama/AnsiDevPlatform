@@ -1,0 +1,27 @@
+---
+- name: Install EPEL repository
+  yum:
+    name: epel-release
+
+- name: Install packages with yum
+  yum:
+    name: "{{ jenkins_yum_deps }}"
+    state: present
+
+- name: Install python modules
+  pip:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ jenkins_python_deps }}"
+
+- name: Install Java8
+  include_role:
+    name: geerlingguy.java
+  vars:
+    java_packages:
+      - java-1.8.0-openjdk
+
+- name: Install Jenkins
+  include_role:
+    name: ansible-role-jenkins
+  notify: restart jenkins

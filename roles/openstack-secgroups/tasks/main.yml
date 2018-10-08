@@ -6,3 +6,7 @@
 - import_tasks: jumphost.yml
   tags:
     - jumphost-secgroup
+
+- import_tasks: jenkinsmaster.yml
+  tags:
+    - jenkins-secgroup

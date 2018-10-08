@@ -5,9 +5,13 @@ localhost ansible_connection=local
 localhost_group
 jumphosts
 dbservers
+jenkinsmasters
 
 [jumphosts]
 jump1-env1 ansible_host="{{ envdef.jump1_floating_ip }}" mgmt_ip="{{ envdef.jump1_ip }}" floating_ip="{{ envdef.jump1_floating_ip }}"
 
 [dbservers]
 db1-env1 ansible_host="{{ envdef.db1_ip }}" mgmt_ip="{{ envdef.db1_ip }}"
+
+[jenkinsmasters]
+jenkins1-env1 ansible_host="{{ envdef.jenkins1_ip }}" mgmt_ip="{{ envdef.jenkins1_ip }}" floating_ip="{{ envdef.jenkins1_floating_ip }}"

@@ -12,6 +12,10 @@ openstack_project_name: "Test Project"
 
 openstack_region: "fi-1"
 
+# This is list of networks from where developers are accessing the system from outside.
+devel_networks:
+  - 131.177.0.0/16
+
 envdef:
   name: ENV1
 
@@ -21,3 +25,6 @@ envdef:
   jump1_floating_ip: 213.157.72.109
 
   db1_ip: 10.10.10.21
+
+  jenkins1_ip: 10.10.10.30
+  jenkins1_floating_ip: 213.157.72.121

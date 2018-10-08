@@ -31,3 +31,12 @@
     state: forcereinstall
   tags: [jinja2]
 
+# git clone from github fails unless these packages are updated
+- name: Upgrade some packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - nss
+    - curl
+    - libcurl

@@ -1,0 +1,11 @@
+---
+# This file contains list of external roles that are fetched with update-roles.bash
+
+# Jenkins installation
+- src: https://github.com/geerlingguy/ansible-role-jenkins
+
+# Dependency of ansible-role-jenkins
+# (no longer installed automatically because we disabled dependent role download)
+- src: https://github.com/geerlingguy/ansible-role-java
+  name: geerlingguy.java # This name is required becuase it's hardcoded in ansible-role-jenkins
+...

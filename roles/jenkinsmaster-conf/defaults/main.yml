@@ -1,0 +1,26 @@
+---
+# NOTE: Installed Jenkins plugins and other Jenkins application settings are
+#       defined in global variable file jenkins_config.yml
+
+jenkins_yum_deps:
+  - git
+  - python-devel
+  - bind-utils
+  - nano
+  - vim
+  - bash-completion
+  - net-tools
+  - python-pip
+  - traceroute
+  - tcpdump
+  - ca-certificates
+  - openssl-devel
+  - libffi-devel
+  - "@Development tools"
+  - bash-completion-extras
+  - gcc
+  - nginx  # used for screenshot storage
+
+jenkins_python_deps:
+  - python-jenkins
+...

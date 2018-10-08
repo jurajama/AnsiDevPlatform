@@ -1,0 +1,42 @@
+---
+- name: Precheck of environment variables
+  import_playbook: precheck_keypair.yml
+  tags: [always]
+
+- name: Precheck of environment variables
+  import_playbook: precheck_osenv.yml
+  tags: [always]
+
+- name: Create Jenkins master node
+  hosts: jenkinsmasters
+  gather_facts: false
+  roles:
+    - role: openstack-vm-create
+      vm_name: "{{ inventory_hostname }}"
+      networks:
+        - { name: "{{ os_net_name }}", ip: "{{ mgmt_ip }}" }
+      boot_image: "{{ centos_image_name }}"
+      flavor: "{{ jenkins_flavor }}"
+      security_groups: "jenkinsmaster"
+      public_primary_ip: "{{ floating_ip }}"
+      ssh_check_username: "centos"
+      ssh_check_ip: "{{ mgmt_ip }}"
+      delegate_to: localhost
+  tags: [vms]
+
+- name: Configure users on Jenkins master node
+  hosts: jenkinsmasters
+  become: yes
+  remote_user: "{{ 'centos' if ((instance is defined and instance.changed==true) or force_centos is defined ) else (omit) }}"
+  roles:
+    - role: users
+  tags: [users]
+
+- name: Configure Jenkins master node
+  hosts: jenkinsmasters
+  become: yes
+  roles:
+    - openstack-vm-common
+    - jenkinsmaster-conf
+  tags: [conf]
+...

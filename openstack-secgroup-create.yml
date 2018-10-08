@@ -1,8 +1,9 @@
 ---
 - name: Precheck of environment variables
-  include: precheck_osenv.yml
+  import_playbook: precheck_osenv.yml
   tags: [always]
 
-- hosts: localhost
+- name: Create OpenStack security groups
+  hosts: localhost
   roles:
     - role: openstack-secgroups
