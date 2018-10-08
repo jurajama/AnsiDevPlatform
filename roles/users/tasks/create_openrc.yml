@@ -5,7 +5,7 @@
 - name: Make Nebula cloud config file for admin users
   template:
     src: "templates/nebula_openrc.sh"
-    dest: "/home/{{ user.name }}/nebula_openrc.sh"
+    dest: "/home/{{ user.name }}/nebula_openrc.sh.j2"
     owner: "{{ user.name }}"
     force: no
   with_items: "{{ users }}"
