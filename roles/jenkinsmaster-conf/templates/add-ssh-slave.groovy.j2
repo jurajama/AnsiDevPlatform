@@ -1,0 +1,49 @@
+// Add an SSH slave to Jenkins
+import jenkins.model.*
+import hudson.model.*
+import hudson.slaves.*
+import hudson.plugins.sshslaves.*
+import hudson.plugins.sshslaves.verifiers.NonVerifyingKeyVerificationStrategy
+
+import com.cloudbees.plugins.credentials.impl.*;
+import com.cloudbees.plugins.credentials.*;
+import com.cloudbees.plugins.credentials.domains.*;
+import com.cloudbees.jenkins.plugins.sshcredentials.impl.*;
+
+  String cred_id   = "jenkinsci-privatekey-cred-id"
+  String username  = "jenkinsci"
+
+// These parameters are given by the Ansible task using this groovy script
+  String hostname  = "{{ slave_host.value.name }}"
+  String ipaddress = "{{ slave_host.value.ip }}"
+  String hostlabel = "{{ slave_host.value.label }}"
+
+// When multiple masters use the same slave, they must have different workdir in slave
+// Jenkins creates the workdir automatically when the slave is connected
+  String workdir   = "{{ jenkins_slave_workdir }}"
+
+  int numExecutors = Integer.parseInt("{{ jenkins_slaves_executors_per_agent }}")
+
+// Jenkins master uses SSH to initialize the agent in slave
+  SSHLauncher launcher = new SSHLauncher(ipaddress, // host
+                                         22, // port
+                                         cred_id, // Jenkins credential for ssh key
+                                         null, // jvmOptions
+                                         null, // javaPath
+                                         null, // prefixStartSlaveCmd
+                                         null, // suffixStartSlaveCmd
+                                         null, // launchTimeoutSeconds
+                                         null, // maxNumRetries
+                                         null, // retryWaitTime
+                                         new NonVerifyingKeyVerificationStrategy()) // sshHostKeyVerificationStrategy
+
+  Slave slave = new DumbSlave(hostname,
+                              "/home/" + username + "/" + workdir,
+                              launcher)
+
+  slave.setLabelString(hostlabel)
+  slave.setNumExecutors(numExecutors)
+  slave.setMode(hudson.model.Node.Mode.EXCLUSIVE)  // Use this node only for explicitly labeled jobs
+
+  Jenkins.instance.addNode(slave)
+

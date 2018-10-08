@@ -1,0 +1,45 @@
+---
+- name: Install EPEL repository
+  yum:
+    name: epel-release
+
+- name: Install packages with yum
+  yum:
+    name: "{{ jenkins_yum_deps }}"
+    state: present
+
+- name: Install python modules
+  pip:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ jenkins_python_deps }}"
+
+- name: Install Java8
+  include_role:
+    name: geerlingguy.java
+  vars:
+    java_packages:
+      - java-1.8.0-openjdk
+
+- name: Install Jenkins
+  include_role:
+    name: ansible-role-jenkins
+  notify: restart jenkins
+
+# This triggers possible restart before proceeding to configuration
+- meta: flush_handlers
+
+# Make sure that Jenkins is running after possible restart triggered
+# by earlier tasks
+- name: Wait for Jenkins to start up before proceeding
+  wait_for:
+    port: "{{ jenkins_http_port }}"
+
+- name: Wait for Jenkins to start up before proceeding
+  shell: "curl -D - --silent --max-time 5 http://{{ ansible_eth0.ipv4.address }}:{{ jenkins_http_port }}/cli/"
+  register: result
+  until: (result.stdout.find("403 Forbidden") != -1) or (result.stdout.find("200 OK") != -1) and (result.stdout.find("Please wait while") == -1)
+  retries: "{{ jenkins_connection_retries }}"
+  delay: "{{ jenkins_connection_delay }}"
+  changed_when: false
+

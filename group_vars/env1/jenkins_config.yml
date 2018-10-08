@@ -1,0 +1,13 @@
+---
+# This is configuration related to Jenkins master
+
+# This dictionary is used to add slaves for Jenkins
+jenkins_slaves:
+  jump1-env1:
+     name: "jump1-env1"
+     ip: "10.10.10.10"
+     label: "jump_env1"
+
+# This defines the working directory in slaves under /home/jenkinsci that this master uses
+jenkins_slave_workdir: "env_1_master"
+

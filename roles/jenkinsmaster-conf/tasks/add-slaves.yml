@@ -1,0 +1,25 @@
+---
+- name: Set label for master node
+  jenkins_script:
+    url: "{{ jenkins_url }}"
+    script: "{{ lookup('template', 'templates/add-label-for-master.groovy.j2') }}"
+    validate_certs: false
+    user:     "{{ jenkins_admin_username }}"
+    password: "{{ jenkins_admin_password }}"
+  tags:
+    - add-slave
+
+- name: Register slaves
+  jenkins_script:
+    url: "{{ jenkins_url }}"
+    script: "{{ lookup('template', 'templates/add-ssh-slave.groovy.j2') }}"
+    validate_certs: false
+    user:     "{{ jenkins_admin_username }}"
+    password: "{{ jenkins_admin_password }}"
+  with_dict: "{{ jenkins_slaves }}"
+  loop_control:
+    loop_var: slave_host
+    label: "{{ slave_host.value.name }}"
+  tags:
+    - add-slave
+

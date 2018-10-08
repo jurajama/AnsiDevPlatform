@@ -1,0 +1,47 @@
+---
+# Global jenkins settings common for all envs
+jenkins_hostname: "{{ ansible_host }}"
+jenkins_protocol: http
+jenkins_http_port: 8080
+jenkins_url: "{{ jenkins_protocol }}://{{ ansible_default_ipv4.address }}:{{ jenkins_http_port }}"
+jenkins_auth_url: "{{ jenkins_protocol }}://{{ jenkins_admin_username }}:{{ jenkins_admin_password }}@{{ ansible_eth0.ipv4.address }}"
+jenkins_admin_token_auth_url: "{{ jenkins_protocol }}://{{ jenkins_admin_username }}:{{ admin_token }}@{{ ansible_eth0.ipv4.address }}:{{ jenkins_http_port }}/scriptText"
+
+# Defines which plugins are installed in Jenkins:
+jenkins_plugins:
+  - ansible
+  - git
+  - workflow-aggregator
+  - job-restrictions
+  - ssh-agent
+  - envinject
+  - blueocean
+  - ansicolor
+  - deveo
+  - slack
+  - ssh-slaves
+  - timestamper
+  - hidden-parameter
+
+jenkins_admin_username: admin
+jenkins_admin_password: admin123
+
+# Jenkins plugin installation is sometimes very slow and therefore need to use large timeout
+jenkins_plugin_timeout: 500
+
+jenkins_connection_delay: 5
+jenkins_connection_retries: 60
+
+jenkins_slaves_executors_per_agent: 8 # How many jobs can run concurrently per slave
+
+jenkins_gui_slave_label: guinode
+
+# The following information is inserted in Jenkins master credentials store
+jenkins_private_key_users:
+  jenkinsci:
+    username: "jenkinsci"
+    id: "jenkinsci-privatekey-cred-id"
+    pw: "{{ jenkinsci_private_key_pw }}" # Secret from jenkins_credentials.yml
+    pkey: "{{ jenkinsci_private_key }}" # Secret from jenkins_credentials.yml
+    description: "jenkinsci test account private key"
+

@@ -1,0 +1,12 @@
+// Add a label for master node so that it can be referred in test jobs
+import jenkins.model.*
+
+  String guilabel  = "{{ jenkins_gui_slave_label }}"
+  int numExecutors = Integer.parseInt("{{ jenkins_slaves_executors_per_agent }}")
+
+
+// Add label to master node that is represented by Jenkins.instance.
+// Currently GUI tests are run on master.
+  Jenkins.instance.setLabelString(guilabel)
+  Jenkins.instance.setMode(hudson.model.Node.Mode.EXCLUSIVE)
+  Jenkins.instance.setNumExecutors(numExecutors)
