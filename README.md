@@ -7,7 +7,7 @@ This project as such is not intended to be usable for other than demo purposes, 
 Tested to work with Ansible 2.7 in Nebula cloud <A HREF="https://cloud9.nebula.fi">https://cloud9.nebula.fi</A>
 
 ## Getting started
-Jumphost is the node that is intended for running Ansible during normal operations. Only in the very beginning when you create the cluster from scratch, you need to run Ansible elsewhere for example in Docker container <A HREF="https://github.com/jurajama/OS_ansible_client">https://github.com/jurajama/OS_ansible_client</A>
+Jumphost is the node that is intended for running Ansible during normal operations. Only in the very beginning when you create the cluster from scratch, you need to run Ansible elsewhere for example in Docker container <A HREF="https://github.com/jurajama/OS_ansible_client">https://github.com/jurajama/OS_ansible_client</A>. SSH agent forwarding must be in use when using the container, that is described in the readme-page of that repository.
 
 Any other nodes shall be deployed by running Ansible in jumphost, because it is expected that many of the other nodes do not have public IP and therefore direct connection from the outside world would not be possible.
 
