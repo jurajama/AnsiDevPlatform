@@ -15,12 +15,14 @@ dbserver-create-os.yml is not deploying any real DB server, but serves as a skel
 
 jenkins-create-os.yml deploys Jenkins master server that could be used for continuous integration purposes. Jumphost is registered as a slave for Jenkins.
 
-Before running any Ansible playbooks, you shall set environment variables that define the used OpenStack project and credentials. Example template is in roles/users/templates/nebula_openrc.sh.j2. When jumphost is configured, that template is used to create environment-script in each users home directory with variables replaced by OpenStack project information configured in group_vars/env1/envconfig.yml.
+Before running any Ansible playbooks, you shall set environment variables that define the used OpenStack project and credentials. Example template is in roles/users/templates/nebula_openrc.sh.j2. When jumphost is configured, that template is used to create environment-script in each users home directory with variables replaced by OpenStack project information configured in group_vars/env1/envconfig.yml. After you have properly filled openrc file in your home dir, activate it by "source filename.sh"
 
 The idea is that this same codebase can be used to deploy multiple environment instances, for example dev, staging and prod. They are differentiated by env-specific variables under group_vars and inventory file in inventories directory. When using the playbooks, you shall define the used inventory with -i parameter:
 
 <PRE>ansible-playbook -i inventories/env1 jump-create-os.yml</PRE>
 
 The basic principle is that each environment shall have its own jumphost, as typically many application nodes would not have a public IP but accessible only via the jumphost of that specific env.
+
+If you want to deploy Jenkins using jenkins-create-os.yml, run "./update-roles.bash" to update external roles.
 
 Tested to work with Ansible 2.7 in Nebula cloud <A HREF="https://cloud9.nebula.fi">https://cloud9.nebula.fi</A>
