@@ -37,3 +37,5 @@ Jenkins connects to jumphost using private key stored in group_vars/all/jenkins_
 
 **Note:** Before deploying Jenkins using jenkins-create-os.yml, run "./update-roles.bash" to update external roles. That fetches some code from github to ext-roles directory.
 
+After Jenkins has been deployed, you can access GUI with http://jenkins_floating_ip:8080. Default credentials are username=admin, password=admin123. When deploying Jenkins for real use, change admin password in variable jenkins_admin_password before deployment.
+
