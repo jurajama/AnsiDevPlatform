@@ -13,16 +13,27 @@ Jumphost is the node that is intended for running Ansible during normal operatio
 Any other nodes shall be deployed by running Ansible in jumphost, because it is expected that many of the other nodes do not have public IP and therefore direct connection from the outside world would not be possible.
 
 ### Configuration preparations
-Before running any Ansible playbooks or using OpenStack CLI commands, you shall set environment variables that define the used OpenStack project and credentials. Example template is in roles/users/templates/nebula_openrc.sh.j2. When jumphost is configured, that template is used to create environment-script in each users home directory with variables replaced by OpenStack project information configured in *group_vars/env1/envconfig.yml*. After you have properly filled openrc file in your home dir, activate it by *"source filename.sh"* and test with *"nova list"* command that it does not show authentication error.
+Before running any Ansible playbooks or using OpenStack CLI commands, you shall set environment variables that define the used OpenStack project and credentials. Example template is in roles/users/templates/nebula_openrc.sh.j2. When jumphost is configured, that template is used to create environment-script in each users home directory with variables replaced by OpenStack project information configured in *group_vars/env1/envconfig.yml*. 
+
+Import your SSH public key to OpenStack. The name of this key shall be referred by environment variable *OS_KEYPAIR_NAME* when running the playbooks, so you shall put line like this in the openrc file:
+```
+export OS_KEYPAIR_NAME=yourkeyname
+```
+
+After you have properly filled openrc file in your home dir, activate it by *"source filename.sh"* and test with *"nova list"* command that it does not show authentication error.
 
 Configure your OpenStack project ID and project name in *group_vars/env1/envconfig.yml*. They shall be exactly like shown in the openrc file downloaded from OpenStack GUI.
 
 ### Creating OpenStack networks and security groups
 After you have the initial Ansible runtime environment created and OpenStack API access working, the next step is to create a network and router in OpenStack. That is done by playbook:
-<PRE>ansible-playbook -i inventories/env1 openstack-net-create.yml</PRE>
+```
+ansible-playbook -i inventories/env1 openstack-net-create.yml
+```
 
 Then create security groups:
-<PRE>ansible-playbook -i inventories/env1 openstack-secgroup-create.yml</PRE>
+```
+ansible-playbook -i inventories/env1 openstack-secgroup-create.yml
+```
 
 ### Allocating floating IPs
 The VMs are deployed with fixed IPs defined in the environment's env_config.yml file in group_vars. When floating IPs are needed, that is at least for jumphost, you shall manually allocate the IP when you start creating the project. IPs are easy to allocate using openstack CLI command run for example in *OS_ansible_client* container.
@@ -37,7 +48,9 @@ User management is an important part of this solution. All admin users shall be 
 
 The idea is that this same codebase can be used to deploy multiple environment instances, for example dev, staging and prod. They are differentiated by env-specific variables under group_vars and inventory file in inventories directory. When using the playbooks, you shall define the used inventory with -i parameter. This is the command to create jumphost for env1 environment after you have tuned the configuration to match with your environment.
 
-<PRE>ansible-playbook -i inventories/env1 jump-create-os.yml</PRE>
+```
+ansible-playbook -i inventories/env1 jump-create-os.yml
+```
 
 The basic principle is that each environment shall have its own jumphost, as typically many application nodes would not have a public IP but accessible only via the jumphost of that specific env.
 
