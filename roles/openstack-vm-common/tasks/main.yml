@@ -4,10 +4,13 @@
   timezone:
     name: "{{ vm_timezone |default('Europe/Helsinki') }}"
 
+- name: Install EPEL repository
+  yum:
+    name: epel-release
+
 - name: Install packages
   yum:
-    name: "{{ item }}"
-  loop:
+    name:
     - tcpdump
     - nano
 

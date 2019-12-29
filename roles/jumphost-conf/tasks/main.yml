@@ -8,6 +8,17 @@
     name: "{{ jump_packages }}"
     state: present
 
+- name: Install python-pip
+  include_role:
+    name: azavea.pip
+
+# Some python module versions that come by default from CentOS is very old and causes trouble to pip
+- name: Remove some python packages that originate from CentOS repository
+  yum:
+    name:
+      - python-requests
+    state: absent
+
 - name: Copy pip requirements file to target
   template:
     src: "templates/pip-requirements.txt.j2"
@@ -34,9 +45,8 @@
 # git clone from github fails unless these packages are updated
 - name: Upgrade some packages
   yum:
-    name: "{{ item }}"
-    state: latest
-  loop:
+    name:
     - nss
     - curl
     - libcurl
+    state: latest

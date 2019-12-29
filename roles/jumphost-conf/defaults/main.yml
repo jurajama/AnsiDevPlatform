@@ -1,5 +1,5 @@
 ---
-jumphost_ansible_version: "2.7.0.0"
+jumphost_ansible_version: "2.9.2"
 
 # Default Jinja2 version is too old and therefore upgrading
 # https://github.com/ansible/ansible/issues/31762

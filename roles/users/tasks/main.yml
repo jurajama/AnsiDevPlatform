@@ -44,7 +44,6 @@
 
 - name: Create openrc files in jumphost
   include_tasks: create_openrc.yml
-  static: no
   when:
     - inventory_hostname in groups['jumphosts']
     - item.state is undefined or item.state == 'present'
@@ -55,7 +54,6 @@
   include_tasks: ssh_config.yml
   vars:
     single_user: "{{ item.0 }}"
-  static: no
   when:
     - inventory_hostname in groups['jumphosts']
     - item.1 in group_names + [ 'all' ] and ( item.0.state is undefined or item.0.state == 'present')

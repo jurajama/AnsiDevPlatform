@@ -1,8 +1,6 @@
 ---
-centos_image_name: "CentOS 7 x86_64"
+centos_image_name: "CentOS 7 x86_64 (LATEST)"
 
 jump_flavor: "nbl-n1-small"
 db_flavor:   "nbl-n1-small"
 jenkins_flavor: "nbl-n1-small"
-
-jumphost_ansible_version: "2.7.0.0"

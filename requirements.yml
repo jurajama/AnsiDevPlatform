@@ -8,4 +8,9 @@
 # (no longer installed automatically because we disabled dependent role download)
 - src: https://github.com/geerlingguy/ansible-role-java
   name: geerlingguy.java # This name is required becuase it's hardcoded in ansible-role-jenkins
+
+# This role installs python pip from official pypa.io server to avoid problems that would occur
+# if using yum install from epel-release
+- src: https://github.com/azavea/ansible-pip
+  name: azavea.pip
 ...

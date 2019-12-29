@@ -1,7 +1,6 @@
 ---
 jump_packages:
   - python-devel
-  - python-pip
   - screen
   - libffi
   - libffi-devel
