@@ -4,7 +4,7 @@ This is demonstration of deploying VMs to OpenStack cloud with Ansible, producin
 
 This project as such is not intended to be usable for other than demo purposes, but the idea is that you fork or copy it to your own repository where you do your real work. 
 
-Tested to work with Ansible 2.7 in Nebula cloud <A HREF="https://cloud9.nebula.fi">https://cloud9.nebula.fi</A>
+Tested to work with Ansible 2.9.2 in Nebula cloud <A HREF="https://cloud9.nebula.fi">https://cloud9.nebula.fi</A>
 
 ## Getting started
 ### Ansible runtime environment for jumphost deployment
@@ -48,6 +48,8 @@ User management is an important part of this solution. All admin users shall be 
 
 The idea is that this same codebase can be used to deploy multiple environment instances, for example dev, staging and prod. They are differentiated by env-specific variables under group_vars and inventory file in inventories directory. When using the playbooks, you shall define the used inventory with -i parameter. This is the command to create jumphost for env1 environment after you have tuned the configuration to match with your environment.
 
+**Note:** Before deploying any nodes, run *"./update-roles.bash"* to update external roles. That fetches some code from github to ext-roles directory.
+
 ```
 ansible-playbook -i inventories/env1 jump-create-os.yml
 ```
@@ -59,8 +61,6 @@ The basic principle is that each environment shall have its own jumphost, as typ
 
 *jenkins-create-os.yml* deploys Jenkins master server that could be used for continuous integration purposes. Jumphost is registered as a slave for Jenkins.
 Jenkins connects to jumphost using private key stored in group_vars/all/jenkins_credentials.yml and corresponding public key in *group_vars/all/users.yml*. **NOTE: Do not use these demo SSH keys in any production environment but create your own keys.** Also when you put any passwords or private keys in your own repository, encrypt those configuration files with ansible-vault. Search google for information on how to use ansible-vault.
-
-**Note:** Before deploying Jenkins using *jenkins-create-os.yml*, run *"./update-roles.bash"* to update external roles. That fetches some code from github to ext-roles directory.
 
 After Jenkins has been deployed, you can access GUI with http://jenkins_floating_ip:8080. Default credentials are username=admin, password=admin123. When deploying Jenkins for real use, change admin password in variable *jenkins_admin_password* before deployment.
 

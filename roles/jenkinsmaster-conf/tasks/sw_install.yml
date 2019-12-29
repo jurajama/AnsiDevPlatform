@@ -22,7 +22,7 @@
       - java-1.8.0-openjdk
 
 - name: Install Jenkins
-  include_role:
+  import_role:
     name: ansible-role-jenkins
   notify: restart jenkins
 
